@@ -1,0 +1,10 @@
+RewriteEngine On
+
+# Route admin URLs directly to the admin entrypoint
+RewriteRule ^admin/(.*)$ admin/index.php [L,QSA]
+RewriteRule ^admin$ admin/index.php [L,QSA]
+
+# Route everything else through the PHP router
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^.*$ router.php [L,QSA]
