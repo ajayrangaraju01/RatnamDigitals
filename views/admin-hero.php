@@ -12,7 +12,7 @@
     </div>
     <div class="form-group">
         <label for="media_file">Image or Video</label>
-        <input id="media_file" name="media_file" type="file" accept="image/*,video/*">
+        <input id="media_file" name="media_file" type="file" accept="image/*,video/*" data-image-crop="1.777778">
     </div>
     <div class="form-group">
         <label for="button_text">Button Text</label>
@@ -59,3 +59,4 @@
         </tbody>
     </table>
 </div>
+<script src="/static/js/image-upload-crop.js"></script>

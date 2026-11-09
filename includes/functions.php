@@ -25,9 +25,19 @@ function ensureAppDatabase(): void
             category TEXT DEFAULT 'other',
             caption TEXT DEFAULT '',
             is_featured INTEGER DEFAULT 0,
+            carousel_crop_x REAL DEFAULT 50,
+            carousel_crop_y REAL DEFAULT 50,
             uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )"
     );
+
+    $imageColumns = $pdo->query('PRAGMA table_info(images)')->fetchAll(PDO::FETCH_COLUMN, 1);
+    if (!in_array('carousel_crop_x', $imageColumns, true)) {
+        $pdo->exec('ALTER TABLE images ADD COLUMN carousel_crop_x REAL DEFAULT 50');
+    }
+    if (!in_array('carousel_crop_y', $imageColumns, true)) {
+        $pdo->exec('ALTER TABLE images ADD COLUMN carousel_crop_y REAL DEFAULT 50');
+    }
 
     $pdo->exec(
         "CREATE TABLE IF NOT EXISTS booking_requests (
@@ -51,6 +61,7 @@ function ensureAppDatabase(): void
             title TEXT NOT NULL,
             description TEXT NOT NULL,
             price TEXT NOT NULL,
+            service_icon TEXT DEFAULT '',
             background_image TEXT DEFAULT '',
             order_index INTEGER DEFAULT 0,
             is_active INTEGER DEFAULT 1,
@@ -58,6 +69,11 @@ function ensureAppDatabase(): void
             updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )"
     );
+
+    $serviceColumns = $pdo->query('PRAGMA table_info(services)')->fetchAll(PDO::FETCH_COLUMN, 1);
+    if (!in_array('service_icon', $serviceColumns, true)) {
+        $pdo->exec("ALTER TABLE services ADD COLUMN service_icon TEXT DEFAULT ''");
+    }
 
     $pdo->exec(
         "CREATE TABLE IF NOT EXISTS hero_slides (
@@ -179,8 +195,24 @@ function getImageCategories(): array
 function getFeaturedImages(): array
 {
     $pdo = getDb();
-    $stmt = $pdo->query("SELECT * FROM images WHERE is_featured = 1 ORDER BY id DESC LIMIT 6");
-    return $stmt->fetchAll();
+    $featured = $pdo->query('SELECT * FROM images WHERE is_featured = 1 ORDER BY id DESC LIMIT 5')->fetchAll();
+    if (count($featured) >= 2) {
+        return $featured;
+    }
+
+    $images = [];
+    foreach ($featured as $image) {
+        $images[$image['id']] = $image;
+    }
+    $recent = $pdo->query('SELECT * FROM images ORDER BY uploaded_at DESC, id DESC LIMIT 5')->fetchAll();
+    foreach ($recent as $image) {
+        $images[$image['id']] = $image;
+        if (count($images) >= 5) {
+            break;
+        }
+    }
+
+    return array_values($images);
 }
 
 function getHeroSlides(): array

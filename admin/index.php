@@ -58,6 +58,37 @@ switch ($action) {
         break;
 
     case 'upload':
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['image_action'] ?? '') === 'set_crop') {
+            $pdo = getDb();
+            $imageId = (int) ($_POST['id'] ?? 0);
+            $cropX = max(0, min(100, (float) ($_POST['crop_x'] ?? 50)));
+            $cropY = max(0, min(100, (float) ($_POST['crop_y'] ?? 50)));
+            $stmt = $pdo->prepare('UPDATE images SET carousel_crop_x = :crop_x, carousel_crop_y = :crop_y WHERE id = :id');
+            $stmt->execute([':crop_x' => $cropX, ':crop_y' => $cropY, ':id' => $imageId]);
+            addFlash('success', 'Carousel crop saved.');
+            redirect('/admin?page=upload');
+        }
+
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['image_action'] ?? '') === 'set_featured') {
+            $pdo = getDb();
+            $imageId = (int) ($_POST['id'] ?? 0);
+            $isFeatured = !empty($_POST['is_featured']) ? 1 : 0;
+
+            if ($isFeatured) {
+                $stmt = $pdo->prepare('SELECT COUNT(*) FROM images WHERE is_featured = 1 AND id != :id');
+                $stmt->execute([':id' => $imageId]);
+                if ((int) $stmt->fetchColumn() >= 5) {
+                    addFlash('error', 'Choose up to five photos for the homepage carousel.');
+                    redirect('/admin?page=upload');
+                }
+            }
+
+            $stmt = $pdo->prepare('UPDATE images SET is_featured = :is_featured WHERE id = :id');
+            $stmt->execute([':is_featured' => $isFeatured, ':id' => $imageId]);
+            addFlash('success', $isFeatured ? 'Photo added to the homepage carousel.' : 'Photo removed from the homepage carousel.');
+            redirect('/admin?page=upload');
+        }
+
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
             $saved = saveUploadedFile($_FILES['file'], 'media/photos');
             if ($saved) {
@@ -120,30 +151,57 @@ switch ($action) {
         break;
 
     case 'services':
+        $pdo = getDb();
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['service_action'])) {
-            $pdo = getDb();
             $serviceAction = $_POST['service_action'];
 
             if ($serviceAction === 'add') {
                 $title = trim($_POST['title'] ?? '');
                 $description = trim($_POST['description'] ?? '');
                 $price = trim($_POST['price'] ?? '');
+                $serviceIcon = trim($_POST['service_icon'] ?? '');
                 $orderIndex = (int) ($_POST['order_index'] ?? 0);
                 $isActive = !empty($_POST['is_active']) ? 1 : 0;
                 $background = null;
                 if (isset($_FILES['background_image']) && $_FILES['background_image']['error'] === UPLOAD_ERR_OK) {
                     $background = saveUploadedFile($_FILES['background_image'], 'media/services');
                 }
-                $stmt = $pdo->prepare('INSERT INTO services (title, description, price, background_image, order_index, is_active) VALUES (:title, :description, :price, :background_image, :order_index, :is_active)');
+                $stmt = $pdo->prepare('INSERT INTO services (title, description, price, service_icon, background_image, order_index, is_active) VALUES (:title, :description, :price, :service_icon, :background_image, :order_index, :is_active)');
                 $stmt->execute([
                     ':title' => $title,
                     ':description' => $description,
                     ':price' => $price,
+                    ':service_icon' => $serviceIcon,
                     ':background_image' => $background,
                     ':order_index' => $orderIndex,
                     ':is_active' => $isActive,
                 ]);
                 addFlash('success', 'Service added.');
+            }
+
+            if ($serviceAction === 'update') {
+                $id = (int) ($_POST['id'] ?? 0);
+                $existing = $pdo->prepare('SELECT background_image FROM services WHERE id = :id');
+                $existing->execute([':id' => $id]);
+                $service = $existing->fetch();
+                if ($service) {
+                    $background = $service['background_image'];
+                    if (isset($_FILES['background_image']) && $_FILES['background_image']['error'] === UPLOAD_ERR_OK) {
+                        $background = saveUploadedFile($_FILES['background_image'], 'media/services') ?? $background;
+                    }
+                    $stmt = $pdo->prepare('UPDATE services SET title = :title, description = :description, price = :price, service_icon = :service_icon, background_image = :background_image, order_index = :order_index, is_active = :is_active, updated_at = CURRENT_TIMESTAMP WHERE id = :id');
+                    $stmt->execute([
+                        ':title' => trim($_POST['title'] ?? ''),
+                        ':description' => trim($_POST['description'] ?? ''),
+                        ':price' => trim($_POST['price'] ?? ''),
+                        ':service_icon' => trim($_POST['service_icon'] ?? ''),
+                        ':background_image' => $background,
+                        ':order_index' => (int) ($_POST['order_index'] ?? 0),
+                        ':is_active' => !empty($_POST['is_active']) ? 1 : 0,
+                        ':id' => $id,
+                    ]);
+                    addFlash('success', 'Service updated.');
+                }
             }
 
             if ($serviceAction === 'delete') {
