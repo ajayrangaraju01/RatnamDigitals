@@ -37,41 +37,62 @@ $serviceChoices = getServiceChoices();
 ?>
 
 <h1 class="page-title">Book Your Session</h1>
-<p class="section-subtitle">Tell us about your vision and we’ll get in touch</p>
+<p class="section-subtitle">Tell us about your vision and we'll get in touch</p>
 
-<form method="post" action="/book" class="form-section">
-    <div class="form-group">
-        <label for="client_name">Name</label>
-        <input id="client_name" name="client_name" type="text" required>
-    </div>
-    <div class="form-group">
-        <label for="email">Email</label>
-        <input id="email" name="email" type="email" required>
-    </div>
-    <div class="form-group">
-        <label for="phone">Phone</label>
-        <input id="phone" name="phone" type="tel">
-    </div>
-    <div class="form-group">
-        <label for="service_type">Service</label>
-        <select id="service_type" name="service_type" required>
-            <option value="">Select a service</option>
-            <?php foreach ($serviceChoices as $key => $label): ?>
-                <option value="<?= htmlspecialchars($key) ?>"><?= htmlspecialchars($label) ?></option>
-            <?php endforeach; ?>
-        </select>
-    </div>
-    <div class="form-group">
-        <label for="requested_date">Preferred Date</label>
-        <input id="requested_date" name="requested_date" type="date" required>
-    </div>
-    <div class="form-group">
-        <label for="requested_time">Preferred Time</label>
-        <input id="requested_time" name="requested_time" type="time">
-    </div>
-    <div class="form-group">
-        <label for="notes">Project Details</label>
-        <textarea id="notes" name="notes" placeholder="Tell us more about your photoshoot"></textarea>
-    </div>
-    <button type="submit" class="btn btn-primary">Submit Request</button>
-</form>
+<div class="booking-layout">
+    <form method="post" action="/book" class="form-section booking-form">
+        <div class="form-group">
+            <label for="client_name">Name</label>
+            <input id="client_name" name="client_name" type="text" required>
+        </div>
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input id="email" name="email" type="email" required>
+        </div>
+        <div class="form-group">
+            <label for="phone">Phone</label>
+            <input id="phone" name="phone" type="tel">
+        </div>
+        <div class="form-group">
+            <label for="service_type">Service</label>
+            <select id="service_type" name="service_type" required>
+                <option value="">Select a service</option>
+                <?php foreach ($serviceChoices as $key => $label): ?>
+                    <option value="<?= htmlspecialchars($key) ?>"><?= htmlspecialchars($label) ?></option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+        <div class="form-group">
+            <label for="requested_date">Preferred Date</label>
+            <input id="requested_date" name="requested_date" type="date" required>
+        </div>
+        <div class="form-group">
+            <label for="requested_time">Preferred Time</label>
+            <input id="requested_time" name="requested_time" type="time">
+        </div>
+        <div class="form-group">
+            <label for="notes">Project Details</label>
+            <textarea id="notes" name="notes" placeholder="Tell us more about your photoshoot"></textarea>
+        </div>
+        <button type="submit" class="btn btn-primary">Submit Request</button>
+    </form>
+
+    <aside class="booking-sidebar">
+        <div class="info-panel">
+            <span class="section-kicker">Why book with us</span>
+            <h3>Simple, personal, and beautifully planned.</h3>
+            <ul>
+                <li>Friendly guidance from idea to final gallery</li>
+                <li>Editorial experience tailored to your story</li>
+                <li>Fast response and clear communication</li>
+            </ul>
+        </div>
+
+        <div class="info-panel muted-panel">
+            <span class="section-kicker">Quick contact</span>
+            <p><strong>Call:</strong> <a href="tel:+919876543210">+91 98765 43210</a></p>
+            <p><strong>Email:</strong> <a href="mailto:info@ratnamdigitals.com">info@ratnamdigitals.com</a></p>
+            <p><strong>Studio:</strong> Hyderabad, Telangana</p>
+        </div>
+    </aside>
+</div>

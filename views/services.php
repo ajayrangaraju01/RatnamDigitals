@@ -9,11 +9,14 @@ $services = getActiveServices();
 <?php if (!empty($services)): ?>
 <div class="services-grid">
     <?php foreach ($services as $service): ?>
-        <div class="service-card<?= !empty($service['background_image']) ? ' service-card-bg' : '' ?>" <?php if (!empty($service['background_image'])): ?>style="background-image: linear-gradient(rgba(0,0,0,0.55), rgba(0,0,0,0.7)), url('/<?= htmlspecialchars($service['background_image']) ?>');"<?php endif; ?>>
+        <div class="service-card<?= !empty($service['background_image']) ? ' service-card-has-photo' : '' ?>">
+            <?php if (!empty($service['background_image'])): ?>
+                <img class="service-card-photo" src="/<?= htmlspecialchars($service['background_image']) ?>" alt="<?= htmlspecialchars($service['title']) ?>" style="object-position: <?= number_format((float) ($service['service_crop_x'] ?? 50), 2, '.', '') ?>% <?= number_format((float) ($service['service_crop_y'] ?? 50), 2, '.', '') ?>%;">
+            <?php endif; ?>
             <?php if (!empty($service['service_icon'])): ?><span class="feature-icon" aria-hidden="true"><?= htmlspecialchars($service['service_icon']) ?></span><?php endif; ?>
             <h3><?= htmlspecialchars($service['title']) ?></h3>
             <p><?= htmlspecialchars($service['description']) ?></p>
-            <div class="price"><?= htmlspecialchars($service['price']) ?></div>
+            <div class="service-note">Custom pricing</div>
         </div>
     <?php endforeach; ?>
 </div>

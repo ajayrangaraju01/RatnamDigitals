@@ -21,6 +21,8 @@
     <div class="form-group">
         <label for="background_image">Background Image</label>
         <input id="background_image" name="background_image" type="file" accept="image/*" data-image-crop="1.333333">
+        <input type="hidden" name="service_crop_x" value="50">
+        <input type="hidden" name="service_crop_y" value="50">
     </div>
     <div class="form-group">
         <label for="order_index">Order</label>
@@ -57,6 +59,8 @@
             <div class="form-group">
                 <label for="background_image-<?= (int) $service['id'] ?>">Photo<?= !empty($service['background_image']) ? ' (currently set)' : '' ?></label>
                 <input id="background_image-<?= (int) $service['id'] ?>" name="background_image" type="file" accept="image/*" data-image-crop="1.333333">
+                <input type="hidden" name="service_crop_x" value="<?= number_format((float) ($service['service_crop_x'] ?? 50), 0, '.', '') ?>">
+                <input type="hidden" name="service_crop_y" value="<?= number_format((float) ($service['service_crop_y'] ?? 50), 0, '.', '') ?>">
             </div>
             <div class="form-group">
                 <label for="order_index-<?= (int) $service['id'] ?>">Order</label>

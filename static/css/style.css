@@ -3,12 +3,14 @@
     --panel: rgba(255, 255, 255, 0.74);
     --panel-strong: #ffffff;
     --ink: #1a1a1a;
+    --ink-soft: #342f2c;
     --muted: #5e5a57;
     --line: rgba(27, 27, 27, 0.08);
     --gold: #c9a46a;
     --gold-deep: #a67c40;
     --gold-soft: #f0e0c5;
     --shadow: 0 24px 60px rgba(17, 17, 17, 0.12);
+    --shadow-soft: 0 18px 35px rgba(17, 17, 17, 0.08);
 }
 
 html {
@@ -27,8 +29,16 @@ body {
     line-height: 1.6;
     color: var(--ink);
     background:
-        radial-gradient(circle at top, rgba(201, 164, 106, 0.12), transparent 32%),
+        radial-gradient(circle at top, rgba(201, 164, 106, 0.14), transparent 28%),
         linear-gradient(180deg, #faf6f2 0%, #f3efe9 100%);
+}
+
+h1,
+h2,
+h3,
+.navbar .logo {
+    font-family: Georgia, 'Times New Roman', serif;
+    letter-spacing: -0.02em;
 }
 
 a {
@@ -383,6 +393,14 @@ footer {
     font-size: 0.95rem;
 }
 
+.portfolio-filter-bar {
+    display: flex;
+    justify-content: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-bottom: 2rem;
+}
+
 .portfolio-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -393,12 +411,14 @@ footer {
 .portfolio-item {
     position: relative;
     overflow: hidden;
+    border: 0;
     border-radius: 20px;
     aspect-ratio: 4 / 3;
-    border: 1px solid rgba(17, 17, 17, 0.08);
+    background: transparent;
     box-shadow: 0 18px 30px rgba(17, 17, 17, 0.08);
     cursor: pointer;
     transition: transform 0.28s ease, box-shadow 0.28s ease;
+    padding: 0;
 }
 
 .portfolio-item:hover {
@@ -417,6 +437,97 @@ footer {
     transform: scale(1.06);
 }
 
+.portfolio-item-overlay {
+    position: absolute;
+    inset: auto 0 0 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1rem;
+    background: linear-gradient(180deg, transparent, rgba(0,0,0,0.72));
+    color: #fff;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+}
+
+.portfolio-lightbox {
+    position: fixed;
+    inset: 0;
+    background: rgba(12, 12, 12, 0.78);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.25s ease, visibility 0.25s ease;
+    z-index: 400;
+}
+
+.portfolio-lightbox.open {
+    opacity: 1;
+    visibility: visible;
+}
+
+.portfolio-lightbox-inner {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(240px, 1.2fr) minmax(220px, 0.8fr);
+    gap: 1rem;
+    width: min(900px, 100%);
+    background: rgba(255, 255, 255, 0.94);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 30px 60px rgba(0,0,0,0.32);
+}
+
+.portfolio-lightbox-inner img {
+    width: 100%;
+    height: 100%;
+    max-height: 72vh;
+    object-fit: cover;
+}
+
+.portfolio-lightbox-copy {
+    padding: 1.6rem 1.3rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: linear-gradient(180deg, rgba(255,255,255,0.7), rgba(246,239,233,0.95));
+}
+
+.portfolio-lightbox-copy h3 {
+    margin: 0.4rem 0 0.8rem;
+    font-size: clamp(1.65rem, 1.2vw + 1rem, 2.1rem);
+}
+
+.portfolio-lightbox-copy p {
+    color: var(--muted);
+    margin-bottom: 1.2rem;
+}
+
+.portfolio-lightbox-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 42px;
+    height: 42px;
+    border: none;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.92);
+    color: #111;
+    font-size: 2rem;
+    line-height: 1;
+    cursor: pointer;
+    z-index: 1;
+}
+
+body.modal-open {
+    overflow: hidden;
+}
+
 .services-grid {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
@@ -425,35 +536,67 @@ footer {
 }
 
 .service-card {
-    background: rgba(255, 255, 255, 0.7);
-    padding: 1.8rem 1.3rem;
-    border-radius: 22px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.8), rgba(248,244,239,0.88));
+    padding: 1.5rem 1.2rem;
+    border-radius: 20px;
     text-align: left;
     border: 1px solid rgba(17, 17, 17, 0.06);
-    box-shadow: 0 16px 30px rgba(17, 17, 17, 0.05);
+    box-shadow: 0 12px 22px rgba(17, 17, 17, 0.04);
     transition: transform 0.28s ease, box-shadow 0.28s ease;
+    min-height: 220px;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    overflow: hidden;
 }
 
 .service-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 20px 40px rgba(17, 17, 17, 0.08);
+    box-shadow: 0 18px 30px rgba(17, 17, 17, 0.08);
 }
 
-.service-card-bg {
-    background-size: cover;
-    background-position: center;
-    color: #fff;
-    text-align: left;
-    min-height: 270px;
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-end;
+.service-card-has-photo {
+    padding: 0;
+    background: rgba(17, 17, 17, 0.04);
 }
 
-.service-card-bg h3,
-.service-card-bg p,
-.service-card-bg .price {
-    color: #fff;
+.service-card-photo {
+    width: 100%;
+    height: 210px;
+    object-fit: cover;
+    object-position: center 28%;
+    display: block;
+    border-bottom: 1px solid rgba(17, 17, 17, 0.08);
+}
+
+@media (min-width: 1000px) {
+    .service-card-photo {
+        object-position: center 30%;
+    }
+}
+
+.service-card-has-photo > .feature-icon,
+.service-card-has-photo > h3,
+.service-card-has-photo > p,
+.service-card-has-photo > .service-note {
+    margin-left: 1.2rem;
+    margin-right: 1.2rem;
+}
+
+.service-card-has-photo > .feature-icon {
+    margin-top: 1rem;
+}
+
+.service-card-has-photo > h3 {
+    margin-top: 0.6rem;
+}
+
+.service-card-has-photo > p {
+    margin-top: 0.35rem;
+}
+
+.service-card-has-photo > .service-note {
+    margin-bottom: 1.1rem;
 }
 
 .service-card h3 {
@@ -464,15 +607,254 @@ footer {
 
 .service-card p {
     color: var(--muted);
-    font-size: 0.96rem;
+    font-size: 0.95rem;
     margin-bottom: 0.7rem;
 }
 
-.service-card .price {
-    margin-top: 0.8rem;
-    font-size: 1.6rem;
-    font-weight: 800;
+.service-note {
+    margin-top: auto;
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
     color: var(--gold-deep);
+    padding-top: 0.8rem;
+    border-top: 1px solid rgba(17, 17, 17, 0.08);
+}
+
+.service-card-bg .service-note {
+    color: rgba(255,255,255,0.88);
+    border-top-color: rgba(255,255,255,0.16);
+}
+
+.section-heading-row {
+    margin-bottom: 1.5rem;
+}
+
+.premium-section,
+.testimonial-section,
+.pricing-section {
+    margin-top: 4rem;
+}
+
+.process-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.2rem;
+}
+
+.process-card {
+    background: rgba(255, 255, 255, 0.72);
+    border: 1px solid rgba(17, 17, 17, 0.06);
+    border-radius: 22px;
+    padding: 1.5rem 1.2rem;
+    box-shadow: 0 18px 36px rgba(17, 17, 17, 0.04);
+}
+
+.process-step {
+    display: inline-flex;
+    margin-bottom: 0.75rem;
+    color: var(--gold-deep);
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    font-size: 0.76rem;
+}
+
+.process-card h3 {
+    margin-bottom: 0.55rem;
+    font-size: 1.25rem;
+}
+
+.process-card p {
+    color: var(--muted);
+}
+
+.testimonial-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.1rem;
+}
+
+.testimonial-card {
+    position: relative;
+    background: linear-gradient(180deg, rgba(255,255,255,0.82), rgba(255,255,255,0.72));
+    border: 1px solid rgba(17, 17, 17, 0.06);
+    border-radius: 24px;
+    padding: 1.5rem 1.3rem 1.2rem;
+    box-shadow: 0 18px 36px rgba(17, 17, 17, 0.04);
+}
+
+.quote-mark {
+    color: rgba(201, 164, 106, 0.9);
+    font-size: 3.2rem;
+    line-height: 1;
+    margin-bottom: 0.3rem;
+    font-family: Georgia, serif;
+}
+
+.testimonial-card p {
+    color: var(--muted);
+    font-size: 1rem;
+    margin-bottom: 1rem;
+}
+
+.testimonial-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    color: var(--ink);
+}
+
+.testimonial-meta span {
+    color: var(--muted);
+    font-size: 0.82rem;
+    letter-spacing: 0.03em;
+}
+
+.brand-story-section {
+    margin-top: 4rem;
+}
+
+.brand-story-layout {
+    display: grid;
+    grid-template-columns: 0.9fr 1.1fr;
+    gap: 1.5rem;
+    align-items: center;
+    background: rgba(255,255,255,0.72);
+    border: 1px solid rgba(17, 17, 17, 0.06);
+    border-radius: 28px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+}
+
+.brand-story-image {
+    min-height: 360px;
+    background: linear-gradient(135deg, rgba(201,164,106,0.12), rgba(17,17,17,0.04));
+}
+
+.brand-story-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.brand-story-copy {
+    padding: clamp(1.5rem, 2vw, 2.2rem);
+}
+
+.brand-story-copy p {
+    color: var(--muted);
+    margin-bottom: 1rem;
+    font-size: 1.02rem;
+}
+
+.pricing-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 1.2rem;
+}
+
+.pricing-card {
+    position: relative;
+    background: linear-gradient(180deg, rgba(255,255,255,0.84), rgba(246,239,233,0.92));
+    border: 1px solid rgba(17, 17, 17, 0.08);
+    border-radius: 24px;
+    padding: 1.7rem 1.3rem;
+    box-shadow: 0 18px 34px rgba(17, 17, 17, 0.04);
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+}
+
+.pricing-card.featured {
+    background: linear-gradient(180deg, rgba(34, 30, 26, 0.98), rgba(27, 27, 27, 0.96));
+    color: #fff;
+    transform: translateY(-4px);
+    border-color: rgba(201, 164, 106, 0.5);
+}
+
+.package-tag {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    display: inline-flex;
+    padding: 0.4rem 0.7rem;
+    border-radius: 999px;
+    background: rgba(201, 164, 106, 0.14);
+    color: var(--gold-soft);
+    border: 1px solid rgba(201, 164, 106, 0.35);
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.09em;
+}
+
+.pricing-card h3 {
+    margin-top: 0.5rem;
+    margin-bottom: 0.8rem;
+    font-size: 1.5rem;
+}
+
+.price-wrap {
+    display: flex;
+    align-items: baseline;
+    gap: 0.45rem;
+    margin-bottom: 0.7rem;
+}
+
+.price-wrap .price {
+    font-size: 2.1rem;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--gold-deep);
+}
+
+.featured .price-wrap .price {
+    color: #f3d9a3;
+}
+
+.price-note {
+    color: var(--muted);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.featured .price-note {
+    color: rgba(255, 255, 255, 0.72);
+}
+
+.pricing-card p {
+    color: var(--muted);
+    margin-bottom: 1rem;
+}
+
+.featured p,
+.featured li {
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.pricing-card ul {
+    list-style: none;
+    display: grid;
+    gap: 0.55rem;
+    margin: 0 0 1.3rem;
+}
+
+.pricing-card li {
+    position: relative;
+    padding-left: 1.2rem;
+    color: var(--muted);
+}
+
+.pricing-card li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    top: 0;
+    color: var(--gold-deep);
+    font-size: 1.2rem;
+    line-height: 1;
 }
 
 .cta-banner {
@@ -491,6 +873,35 @@ footer {
 .cta-banner h2 {
     font-size: clamp(1.7rem, 1.6vw + 1rem, 2.4rem);
     line-height: 1.2;
+}
+
+.final-cta-section {
+    margin-top: 3rem;
+}
+
+.final-cta-panel {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1.5rem;
+    padding: clamp(1.6rem, 2vw, 2.4rem);
+    background: linear-gradient(135deg, rgba(22,22,22,0.96), rgba(47,35,26,0.94));
+    border-radius: 26px;
+    color: #fff;
+    box-shadow: 0 28px 48px rgba(17,17,17,0.12);
+}
+
+.final-cta-panel h2 {
+    font-size: clamp(1.9rem, 1.6vw + 1rem, 2.6rem);
+    line-height: 1.15;
+    max-width: 18ch;
+}
+
+.final-cta-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    flex-wrap: wrap;
 }
 
 .form-section {
@@ -547,11 +958,19 @@ footer {
     min-height: 120px;
 }
 
-.contact-info {
+.contact-layout {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 2rem;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 1.5rem;
     margin-top: 2rem;
+}
+
+.panel-card {
+    background: rgba(255, 255, 255, 0.72);
+    border-radius: 24px;
+    border: 1px solid rgba(17, 17, 17, 0.06);
+    box-shadow: var(--shadow);
+    padding: clamp(1.25rem, 2vw, 2rem);
 }
 
 .contact-details h3 {
@@ -565,6 +984,58 @@ footer {
     color: var(--muted);
 }
 
+.contact-details a,
+.muted-panel a {
+    color: var(--gold-deep);
+}
+
+.social-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.contact-cta-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: linear-gradient(135deg, rgba(17,17,17,0.96), rgba(33,27,22,0.95));
+    color: #fff;
+}
+
+.contact-cta-card h3 {
+    margin-bottom: 0.8rem;
+    font-size: clamp(1.8rem, 1.8vw + 1rem, 2.6rem);
+    line-height: 1.1;
+    color: #fff;
+}
+
+.contact-cta-card p {
+    color: rgba(255,255,255,0.78);
+    margin-bottom: 1.2rem;
+}
+
+.mini-contact-list {
+    display: grid;
+    gap: 0.8rem;
+    margin-top: 1.5rem;
+}
+
+.mini-contact-list div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding-top: 0.8rem;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.mini-contact-list span {
+    color: rgba(255,255,255,0.7);
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
 .map-placeholder {
     background: linear-gradient(135deg, rgba(201, 164, 106, 0.08), rgba(17, 17, 17, 0.03));
     height: 300px;
@@ -574,6 +1045,167 @@ footer {
     justify-content: center;
     color: var(--muted);
     border: 1px solid rgba(17, 17, 17, 0.06);
+    margin-top: 1.5rem;
+}
+
+.booking-layout {
+    display: grid;
+    grid-template-columns: 1.25fr 0.75fr;
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.booking-form {
+    margin: 0;
+}
+
+.booking-sidebar {
+    display: grid;
+    gap: 1rem;
+}
+
+.info-panel {
+    background: rgba(255,255,255,0.72);
+    border: 1px solid rgba(17,17,17,0.06);
+    border-radius: 22px;
+    padding: 1.4rem 1.2rem;
+    box-shadow: var(--shadow);
+}
+
+.info-panel h3 {
+    margin-bottom: 0.8rem;
+    font-size: 1.35rem;
+}
+
+.info-panel ul {
+    list-style: none;
+    display: grid;
+    gap: 0.7rem;
+    color: var(--muted);
+    margin-top: 0.8rem;
+}
+
+.info-panel li {
+    position: relative;
+    padding-left: 1.2rem;
+}
+
+.info-panel li::before {
+    content: '•';
+    position: absolute;
+    left: 0;
+    color: var(--gold-deep);
+    font-size: 1.3rem;
+    line-height: 1;
+}
+
+.muted-panel {
+    background: linear-gradient(180deg, rgba(247, 240, 230, 0.9), rgba(255,255,255,0.76));
+}
+
+@media (max-width: 820px) {
+    .contact-layout,
+    .booking-layout,
+    .portfolio-lightbox-inner,
+    .brand-story-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .portfolio-lightbox {
+        padding: 1rem;
+    }
+
+    .portfolio-lightbox-copy {
+        padding-top: 0.5rem;
+    }
+
+    .cta-banner,
+    .final-cta-panel {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .final-cta-panel h2,
+    .cta-banner h2 {
+        max-width: 100%;
+    }
+}
+
+@media (max-width: 640px) {
+    .navbar {
+        padding: 0.85rem 1rem;
+    }
+
+    .navbar .logo {
+        font-size: 1.1rem;
+    }
+
+    .navbar .logo-img {
+        width: 34px;
+        height: 34px;
+    }
+
+    .nav-toggle {
+        display: inline-flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0.28rem;
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        border: 1px solid rgba(255,255,255,0.15);
+        background: rgba(255,255,255,0.04);
+        cursor: pointer;
+    }
+
+    .nav-toggle span {
+        display: block;
+        width: 18px;
+        height: 2px;
+        background: #fff;
+        margin: 0 auto;
+        border-radius: 999px;
+    }
+
+    .nav-links {
+        display: none;
+        position: absolute;
+        top: calc(100% + 0.5rem);
+        left: 1rem;
+        right: 1rem;
+        background: rgba(16, 16, 16, 0.96);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 18px;
+        padding: 0.8rem;
+        box-shadow: var(--shadow-soft);
+    }
+
+    .nav-links.open {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .nav-links a {
+        display: block;
+        padding: 0.8rem 0.85rem;
+        border-radius: 12px;
+    }
+
+    main {
+        padding-left: 0.9rem;
+        padding-right: 0.9rem;
+    }
+
+    .carousel-slide .caption {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 1rem;
+    }
+
+    .feature-strip {
+        grid-template-columns: 1fr;
+    }
 }
 
 .page-title {

@@ -160,19 +160,23 @@ switch ($action) {
                 $description = trim($_POST['description'] ?? '');
                 $price = trim($_POST['price'] ?? '');
                 $serviceIcon = trim($_POST['service_icon'] ?? '');
+                $serviceCropX = max(0, min(100, (float) ($_POST['service_crop_x'] ?? 50)));
+                $serviceCropY = max(0, min(100, (float) ($_POST['service_crop_y'] ?? 50)));
                 $orderIndex = (int) ($_POST['order_index'] ?? 0);
                 $isActive = !empty($_POST['is_active']) ? 1 : 0;
                 $background = null;
                 if (isset($_FILES['background_image']) && $_FILES['background_image']['error'] === UPLOAD_ERR_OK) {
                     $background = saveUploadedFile($_FILES['background_image'], 'media/services');
                 }
-                $stmt = $pdo->prepare('INSERT INTO services (title, description, price, service_icon, background_image, order_index, is_active) VALUES (:title, :description, :price, :service_icon, :background_image, :order_index, :is_active)');
+                $stmt = $pdo->prepare('INSERT INTO services (title, description, price, service_icon, background_image, service_crop_x, service_crop_y, order_index, is_active) VALUES (:title, :description, :price, :service_icon, :background_image, :service_crop_x, :service_crop_y, :order_index, :is_active)');
                 $stmt->execute([
                     ':title' => $title,
                     ':description' => $description,
                     ':price' => $price,
                     ':service_icon' => $serviceIcon,
                     ':background_image' => $background,
+                    ':service_crop_x' => $serviceCropX,
+                    ':service_crop_y' => $serviceCropY,
                     ':order_index' => $orderIndex,
                     ':is_active' => $isActive,
                 ]);
@@ -189,13 +193,17 @@ switch ($action) {
                     if (isset($_FILES['background_image']) && $_FILES['background_image']['error'] === UPLOAD_ERR_OK) {
                         $background = saveUploadedFile($_FILES['background_image'], 'media/services') ?? $background;
                     }
-                    $stmt = $pdo->prepare('UPDATE services SET title = :title, description = :description, price = :price, service_icon = :service_icon, background_image = :background_image, order_index = :order_index, is_active = :is_active, updated_at = CURRENT_TIMESTAMP WHERE id = :id');
+                    $serviceCropX = max(0, min(100, (float) ($_POST['service_crop_x'] ?? 50)));
+                    $serviceCropY = max(0, min(100, (float) ($_POST['service_crop_y'] ?? 50)));
+                    $stmt = $pdo->prepare('UPDATE services SET title = :title, description = :description, price = :price, service_icon = :service_icon, background_image = :background_image, service_crop_x = :service_crop_x, service_crop_y = :service_crop_y, order_index = :order_index, is_active = :is_active, updated_at = CURRENT_TIMESTAMP WHERE id = :id');
                     $stmt->execute([
                         ':title' => trim($_POST['title'] ?? ''),
                         ':description' => trim($_POST['description'] ?? ''),
                         ':price' => trim($_POST['price'] ?? ''),
                         ':service_icon' => trim($_POST['service_icon'] ?? ''),
                         ':background_image' => $background,
+                        ':service_crop_x' => $serviceCropX,
+                        ':service_crop_y' => $serviceCropY,
                         ':order_index' => (int) ($_POST['order_index'] ?? 0),
                         ':is_active' => !empty($_POST['is_active']) ? 1 : 0,
                         ':id' => $id,

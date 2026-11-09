@@ -2,6 +2,8 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelectorAll('input[type="file"][data-image-crop]').forEach(function (input) {
         const form = input.closest('form');
         const aspectRatio = Number.parseFloat(input.dataset.imageCrop);
+        const serviceCropXField = form.querySelector('input[name="service_crop_x"]');
+        const serviceCropYField = form.querySelector('input[name="service_crop_y"]');
         const editor = document.createElement('div');
         editor.className = 'upload-crop-editor';
         editor.hidden = true;
@@ -49,6 +51,12 @@ document.addEventListener('DOMContentLoaded', function () {
             container.appendChild(wrapper);
             range.addEventListener('input', function () {
                 output.value = range.value + suffix;
+                if (serviceCropXField && label === 'Horizontal position') {
+                    serviceCropXField.value = range.value;
+                }
+                if (serviceCropYField && label === 'Vertical position') {
+                    serviceCropYField.value = range.value;
+                }
                 drawPreview();
             });
             return range;

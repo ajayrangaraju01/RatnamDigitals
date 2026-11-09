@@ -63,6 +63,8 @@ function ensureAppDatabase(): void
             price TEXT NOT NULL,
             service_icon TEXT DEFAULT '',
             background_image TEXT DEFAULT '',
+            service_crop_x REAL DEFAULT 50,
+            service_crop_y REAL DEFAULT 50,
             order_index INTEGER DEFAULT 0,
             is_active INTEGER DEFAULT 1,
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -73,6 +75,12 @@ function ensureAppDatabase(): void
     $serviceColumns = $pdo->query('PRAGMA table_info(services)')->fetchAll(PDO::FETCH_COLUMN, 1);
     if (!in_array('service_icon', $serviceColumns, true)) {
         $pdo->exec("ALTER TABLE services ADD COLUMN service_icon TEXT DEFAULT ''");
+    }
+    if (!in_array('service_crop_x', $serviceColumns, true)) {
+        $pdo->exec('ALTER TABLE services ADD COLUMN service_crop_x REAL DEFAULT 50');
+    }
+    if (!in_array('service_crop_y', $serviceColumns, true)) {
+        $pdo->exec('ALTER TABLE services ADD COLUMN service_crop_y REAL DEFAULT 50');
     }
 
     $pdo->exec(
