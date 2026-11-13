@@ -97,6 +97,62 @@ function ensureAppDatabase(): void
             created_at DATETIME DEFAULT CURRENT_TIMESTAMP
         )"
     );
+
+    $packagesTableExists = (bool) $pdo->query("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'packages'")->fetchColumn();
+    $pdo->exec(
+        "CREATE TABLE IF NOT EXISTS packages (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            price TEXT NOT NULL,
+            description TEXT NOT NULL DEFAULT '',
+            items TEXT NOT NULL DEFAULT '',
+            is_featured INTEGER DEFAULT 0,
+            is_active INTEGER DEFAULT 1,
+            order_index INTEGER DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        )"
+    );
+
+    if (!$packagesTableExists) {
+        $defaultPackages = [
+            [
+                'Signature Portrait',
+                '₹12,000',
+                'Perfect for personal branding, lifestyle sessions, or modern portraits.',
+                "1 hour session\nProfessional editing\n20 final images",
+                0,
+                0,
+            ],
+            [
+                'Wedding Story',
+                '₹35,000',
+                'A complete documentary-style coverage designed around your celebration.',
+                "8 hours coverage\nCandid + portrait coverage\nHigh-resolution gallery",
+                1,
+                1,
+            ],
+            [
+                'Brand Content',
+                '₹22,000',
+                'Creative, polished imagery for founders, businesses, and campaigns.',
+                "Creative direction\nStudio or location shoot\nSocial-ready export set",
+                0,
+                2,
+            ],
+        ];
+        $insertPackage = $pdo->prepare('INSERT INTO packages (name, price, description, items, is_featured, order_index) VALUES (:name, :price, :description, :items, :is_featured, :order_index)');
+        foreach ($defaultPackages as [$name, $price, $description, $items, $featured, $order]) {
+            $insertPackage->execute([
+                ':name' => $name,
+                ':price' => $price,
+                ':description' => $description,
+                ':items' => $items,
+                ':is_featured' => $featured,
+                ':order_index' => $order,
+            ]);
+        }
+    }
 }
 
 function addFlash(string $type, string $message): void
@@ -235,4 +291,15 @@ function getActiveServices(): array
     $pdo = getDb();
     $stmt = $pdo->query("SELECT * FROM services WHERE is_active = 1 ORDER BY order_index ASC, id DESC");
     return $stmt->fetchAll();
+}
+
+function getActivePackages(): array
+{
+    $pdo = getDb();
+    $packages = $pdo->query('SELECT * FROM packages WHERE is_active = 1 ORDER BY order_index ASC, id ASC')->fetchAll();
+    foreach ($packages as &$package) {
+        $package['items'] = array_values(array_filter(array_map('trim', explode("\n", str_replace("\r", '', $package['items']))), static fn(string $item): bool => $item !== ''));
+    }
+    unset($package);
+    return $packages;
 }

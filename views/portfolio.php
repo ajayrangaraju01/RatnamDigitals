@@ -25,8 +25,8 @@ $categories = getImageCategories();
 <?php if (!empty($images)): ?>
     <div class="portfolio-grid">
         <?php foreach ($images as $image): ?>
-            <button type="button" class="portfolio-item" data-title="<?= htmlspecialchars($image['title'] ?: 'Ratnam Digitals') ?>" data-caption="<?= htmlspecialchars($image['caption'] ?: 'Curated photography by Ratnam Digitals.') ?>" data-image="/<?= htmlspecialchars($image['file']) ?>">
-                <img src="/<?= htmlspecialchars($image['file']) ?>" alt="<?= htmlspecialchars($image['title'] ?: 'Portfolio image') ?>">
+            <button type="button" class="portfolio-item" data-title="<?= htmlspecialchars($image['title'] ?: 'Ratnam Digitals') ?>" data-caption="<?= htmlspecialchars($image['caption'] ?: 'Curated photography by Ratnam Digitals.') ?>" data-image="/<?= htmlspecialchars($image['file']) ?>" data-crop-x="<?= number_format((float) ($image['carousel_crop_x'] ?? 50), 2, '.', '') ?>" data-crop-y="<?= number_format((float) ($image['carousel_crop_y'] ?? 50), 2, '.', '') ?>">
+                <img src="/<?= htmlspecialchars($image['file']) ?>" alt="<?= htmlspecialchars($image['title'] ?: 'Portfolio image') ?>" style="object-position: <?= number_format((float) ($image['carousel_crop_x'] ?? 50), 2, '.', '') ?>% <?= number_format((float) ($image['carousel_crop_y'] ?? 50), 2, '.', '') ?>%;">
                 <span class="portfolio-item-overlay">
                     <span>View Details</span>
                 </span>

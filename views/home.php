@@ -3,6 +3,7 @@ $title = 'Ratnam Digitals - Professional Photography Studio';
 $heroSlides = getHeroSlides();
 $featuredImages = getFeaturedImages();
 $services = getActiveServices();
+$packages = getActivePackages();
 $highlightCards = [
     [
         'category' => 'portrait',
@@ -72,56 +73,7 @@ $testimonials = [
     ],
 ];
 
-$packages = [
-    [
-        'name' => 'Signature Portrait',
-        'price' => '₹12,000',
-        'description' => 'Perfect for personal branding, lifestyle sessions, or modern portraits.',
-        'featured' => false,
-        'items' => ['1 hour session', 'Professional editing', '20 final images'],
-    ],
-    [
-        'name' => 'Wedding Story',
-        'price' => '₹35,000',
-        'description' => 'A complete documentary-style coverage designed around your celebration.',
-        'featured' => true,
-        'items' => ['8 hours coverage', 'Candid + portrait coverage', 'High-resolution gallery'],
-    ],
-    [
-        'name' => 'Brand Content',
-        'price' => '₹22,000',
-        'description' => 'Creative, polished imagery for founders, businesses, and campaigns.',
-        'featured' => false,
-        'items' => ['Creative direction', 'Studio or location shoot', 'Social-ready export set'],
-    ],
-];
 ?>
-
-<?php if (!empty($featuredImages)): ?>
-<section class="content-section home-photo-section">
-    <div class="carousel" aria-label="Recent photography">
-        <div class="carousel-track">
-        <?php foreach ($featuredImages as $image): ?>
-            <div class="carousel-slide">
-                <img src="/<?= htmlspecialchars($image['file']) ?>" alt="<?= htmlspecialchars($image['title'] ?: 'Ratnam Digitals photography') ?>" style="object-position: <?= number_format((float) ($image['carousel_crop_x'] ?? 50), 2, '.', '') ?>% <?= number_format((float) ($image['carousel_crop_y'] ?? 50), 2, '.', '') ?>%;" loading="lazy">
-                <div class="caption">
-                    <div>
-                        <h3><?= htmlspecialchars($image['title'] ?: 'Ratnam Digitals') ?></h3>
-                        <?php if (!empty($image['caption'])): ?><span><?= htmlspecialchars($image['caption']) ?></span><?php endif; ?>
-                    </div>
-                    <a href="/book" class="btn btn-primary">Book a Session</a>
-                </div>
-            </div>
-        <?php endforeach; ?>
-        </div>
-        <?php if (count($featuredImages) > 1): ?>
-            <button class="carousel-btn prev" type="button" aria-label="Previous photo">&#10094;</button>
-            <button class="carousel-btn next" type="button" aria-label="Next photo">&#10095;</button>
-            <div class="carousel-dots" aria-label="Choose a photo"></div>
-        <?php endif; ?>
-    </div>
-</section>
-<?php endif; ?>
 
 <?php if (!empty($heroSlides)): ?>
 <div class="hero-carousel">
@@ -152,8 +104,8 @@ $packages = [
     <?php if (count($heroSlides) > 1): ?>
         <button class="hero-carousel-btn hero-prev" aria-label="Previous slide">&#10094;</button>
         <button class="hero-carousel-btn hero-next" aria-label="Next slide">&#10095;</button>
-        <div class="hero-carousel-dots"></div>
     <?php endif; ?>
+    <div class="hero-carousel-dots"></div>
 </div>
 <?php endif; ?>
 
@@ -161,7 +113,7 @@ $packages = [
 <section class="feature-strip" aria-label="Explore photography">
     <?php foreach ($highlightCards as $card): ?>
         <a class="feature-card" href="<?= htmlspecialchars($card['href']) ?>">
-            <img src="/<?= htmlspecialchars($card['image']['file']) ?>" alt="<?= htmlspecialchars($card['title']) ?>" loading="lazy">
+            <img src="/<?= htmlspecialchars($card['image']['file']) ?>" alt="<?= htmlspecialchars($card['title']) ?>" style="object-position: <?= number_format((float) ($card['image']['carousel_crop_x'] ?? 50), 2, '.', '') ?>% <?= number_format((float) ($card['image']['carousel_crop_y'] ?? 50), 2, '.', '') ?>%;" loading="lazy">
             <div class="feature-card-content">
                 <span class="feature-card-kicker"><?= htmlspecialchars($card['eyebrow']) ?></span>
                 <h3><?= htmlspecialchars($card['title']) ?></h3>
@@ -251,6 +203,7 @@ $packages = [
     </div>
 </section>
 
+<?php if (!empty($packages)): ?>
 <section class="content-section pricing-section">
     <div class="section-heading-row">
         <div>
@@ -261,7 +214,7 @@ $packages = [
     <div class="pricing-grid">
         <?php foreach ($packages as $package): ?>
             <article class="pricing-card<?= !empty($package['featured']) ? ' featured' : '' ?>">
-                <?php if (!empty($package['featured'])): ?><span class="package-tag">Most Popular</span><?php endif; ?>
+                <?php if (!empty($package['is_featured'])): ?><span class="package-tag">Most Popular</span><?php endif; ?>
                 <h3><?= htmlspecialchars($package['name']) ?></h3>
                 <div class="price-wrap">
                     <span class="price"><?= htmlspecialchars($package['price']) ?></span>
@@ -278,6 +231,7 @@ $packages = [
         <?php endforeach; ?>
     </div>
 </section>
+<?php endif; ?>
 
 <?php if (!empty($services)): ?>
 <section class="content-section">
@@ -320,5 +274,4 @@ $packages = [
     </div>
 </section>
 
-<script src="/static/js/hero-carousel.js"></script>
 <script src="/static/js/carousel.js"></script>

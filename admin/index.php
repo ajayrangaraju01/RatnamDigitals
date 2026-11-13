@@ -58,38 +58,74 @@ switch ($action) {
         break;
 
     case 'upload':
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['image_action'] ?? '') === 'set_crop') {
-            $pdo = getDb();
-            $imageId = (int) ($_POST['id'] ?? 0);
-            $cropX = max(0, min(100, (float) ($_POST['crop_x'] ?? 50)));
-            $cropY = max(0, min(100, (float) ($_POST['crop_y'] ?? 50)));
-            $stmt = $pdo->prepare('UPDATE images SET carousel_crop_x = :crop_x, carousel_crop_y = :crop_y WHERE id = :id');
-            $stmt->execute([':crop_x' => $cropX, ':crop_y' => $cropY, ':id' => $imageId]);
-            addFlash('success', 'Carousel crop saved.');
-            redirect('/admin?page=upload');
-        }
-
-        if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['image_action'] ?? '') === 'set_featured') {
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && ($_POST['image_action'] ?? '') === 'update') {
             $pdo = getDb();
             $imageId = (int) ($_POST['id'] ?? 0);
             $isFeatured = !empty($_POST['is_featured']) ? 1 : 0;
+            $existingStmt = $pdo->prepare('SELECT file FROM images WHERE id = :id');
+            $existingStmt->execute([':id' => $imageId]);
+            $existing = $existingStmt->fetch();
+
+            if (!$existing) {
+                addFlash('error', 'The selected image could not be found.');
+                redirect('/admin?page=upload');
+            }
 
             if ($isFeatured) {
                 $stmt = $pdo->prepare('SELECT COUNT(*) FROM images WHERE is_featured = 1 AND id != :id');
                 $stmt->execute([':id' => $imageId]);
                 if ((int) $stmt->fetchColumn() >= 5) {
-                    addFlash('error', 'Choose up to five photos for the homepage carousel.');
+                    addFlash('error', 'Choose up to five featured photos.');
                     redirect('/admin?page=upload');
                 }
             }
 
-            $stmt = $pdo->prepare('UPDATE images SET is_featured = :is_featured WHERE id = :id');
-            $stmt->execute([':is_featured' => $isFeatured, ':id' => $imageId]);
-            addFlash('success', $isFeatured ? 'Photo added to the homepage carousel.' : 'Photo removed from the homepage carousel.');
+            $category = trim($_POST['category'] ?? 'other');
+            if (!array_key_exists($category, getImageCategories())) {
+                addFlash('error', 'Select a valid image category.');
+                redirect('/admin?page=upload');
+            }
+
+            $imageFile = $existing['file'];
+            if (isset($_FILES['file']) && $_FILES['file']['error'] !== UPLOAD_ERR_NO_FILE) {
+                if ($_FILES['file']['error'] !== UPLOAD_ERR_OK) {
+                    addFlash('error', 'The replacement image could not be uploaded.');
+                    redirect('/admin?page=upload');
+                }
+                $replacement = saveUploadedFile($_FILES['file'], 'media/photos');
+                if ($replacement === null) {
+                    addFlash('error', 'The replacement image could not be saved.');
+                    redirect('/admin?page=upload');
+                }
+                $imageFile = $replacement;
+            }
+
+            $cropX = max(0, min(100, (float) ($_POST['crop_x'] ?? 50)));
+            $cropY = max(0, min(100, (float) ($_POST['crop_y'] ?? 50)));
+            $stmt = $pdo->prepare('UPDATE images SET title = :title, file = :file, category = :category, caption = :caption, is_featured = :is_featured, carousel_crop_x = :crop_x, carousel_crop_y = :crop_y WHERE id = :id');
+            $stmt->execute([
+                ':title' => trim($_POST['title'] ?? ''),
+                ':file' => $imageFile,
+                ':category' => $category,
+                ':caption' => trim($_POST['caption'] ?? ''),
+                ':is_featured' => $isFeatured,
+                ':crop_x' => $cropX,
+                ':crop_y' => $cropY,
+                ':id' => $imageId,
+            ]);
+            addFlash('success', 'Image details saved.');
             redirect('/admin?page=upload');
         }
 
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
+            if (!empty($_POST['is_featured'])) {
+                $featuredCount = (int) getDb()->query('SELECT COUNT(*) FROM images WHERE is_featured = 1')->fetchColumn();
+                if ($featuredCount >= 5) {
+                    addFlash('error', 'Choose up to five featured photos.');
+                    redirect('/admin?page=upload');
+                }
+            }
+
             $saved = saveUploadedFile($_FILES['file'], 'media/photos');
             if ($saved) {
                 $title = trim($_POST['title'] ?? '');
@@ -228,6 +264,71 @@ switch ($action) {
         include __DIR__ . '/../views/admin-layout.php';
         break;
 
+    case 'packages':
+        $pdo = getDb();
+        if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['package_action'])) {
+            $packageAction = $_POST['package_action'];
+
+            if ($packageAction === 'add' || $packageAction === 'update') {
+                $name = trim($_POST['name'] ?? '');
+                $price = trim($_POST['price'] ?? '');
+                $description = trim($_POST['description'] ?? '');
+                $items = implode("\n", array_filter(array_map('trim', preg_split('/\r\n|\r|\n/', $_POST['items'] ?? '') ?: []), static fn(string $item): bool => $item !== ''));
+
+                if ($name === '' || $price === '' || $description === '') {
+                    addFlash('error', 'Enter a package name, price, and description.');
+                    redirect('/admin?page=packages');
+                }
+
+                if ($packageAction === 'add') {
+                    $stmt = $pdo->prepare('INSERT INTO packages (name, price, description, items, is_featured, is_active, order_index) VALUES (:name, :price, :description, :items, :is_featured, :is_active, :order_index)');
+                    $stmt->execute([
+                        ':name' => $name,
+                        ':price' => $price,
+                        ':description' => $description,
+                        ':items' => $items,
+                        ':is_featured' => !empty($_POST['is_featured']) ? 1 : 0,
+                        ':is_active' => !empty($_POST['is_active']) ? 1 : 0,
+                        ':order_index' => (int) ($_POST['order_index'] ?? 0),
+                    ]);
+                    addFlash('success', 'Package added.');
+                } else {
+                    $id = (int) ($_POST['id'] ?? 0);
+                    $stmt = $pdo->prepare('UPDATE packages SET name = :name, price = :price, description = :description, items = :items, is_featured = :is_featured, is_active = :is_active, order_index = :order_index, updated_at = CURRENT_TIMESTAMP WHERE id = :id');
+                    $stmt->execute([
+                        ':name' => $name,
+                        ':price' => $price,
+                        ':description' => $description,
+                        ':items' => $items,
+                        ':is_featured' => !empty($_POST['is_featured']) ? 1 : 0,
+                        ':is_active' => !empty($_POST['is_active']) ? 1 : 0,
+                        ':order_index' => (int) ($_POST['order_index'] ?? 0),
+                        ':id' => $id,
+                    ]);
+                    addFlash('success', 'Package saved.');
+                }
+            }
+
+            if ($packageAction === 'delete') {
+                $id = (int) ($_POST['id'] ?? 0);
+                $stmt = $pdo->prepare('DELETE FROM packages WHERE id = :id');
+                $stmt->execute([':id' => $id]);
+                $deleted = $stmt->rowCount() > 0;
+                addFlash($deleted ? 'success' : 'error', $deleted ? 'Package deleted.' : 'Package not found.');
+            }
+
+            redirect('/admin?page=packages');
+        }
+
+        $packages = $pdo->query('SELECT * FROM packages ORDER BY order_index ASC, id ASC')->fetchAll();
+        $title = 'Packages';
+        $adminPage = 'packages';
+        ob_start();
+        include __DIR__ . '/../views/admin-packages.php';
+        $content = ob_get_clean();
+        include __DIR__ . '/../views/admin-layout.php';
+        break;
+
     case 'hero':
         if ($_SERVER['REQUEST_METHOD'] === 'POST' && !empty($_POST['hero_action'])) {
             $pdo = getDb();
@@ -258,6 +359,45 @@ switch ($action) {
                 addFlash('success', 'Hero slide added.');
             }
 
+            if ($heroAction === 'update') {
+                $id = (int) ($_POST['id'] ?? 0);
+                $existingStmt = $pdo->prepare('SELECT media_file FROM hero_slides WHERE id = :id');
+                $existingStmt->execute([':id' => $id]);
+                $existing = $existingStmt->fetch();
+
+                if (!$existing) {
+                    addFlash('error', 'The selected hero slide could not be found.');
+                    redirect('/admin?page=hero');
+                }
+
+                $media = $existing['media_file'];
+                if (isset($_FILES['media_file']) && $_FILES['media_file']['error'] !== UPLOAD_ERR_NO_FILE) {
+                    if ($_FILES['media_file']['error'] !== UPLOAD_ERR_OK) {
+                        addFlash('error', 'The replacement hero media could not be uploaded.');
+                        redirect('/admin?page=hero');
+                    }
+                    $replacement = saveUploadedFile($_FILES['media_file'], 'media/hero');
+                    if ($replacement === null) {
+                        addFlash('error', 'The replacement hero media could not be saved.');
+                        redirect('/admin?page=hero');
+                    }
+                    $media = $replacement;
+                }
+
+                $stmt = $pdo->prepare('UPDATE hero_slides SET title = :title, subtitle = :subtitle, media_file = :media_file, button_text = :button_text, button_link = :button_link, order_index = :order_index, is_active = :is_active WHERE id = :id');
+                $stmt->execute([
+                    ':title' => trim($_POST['title'] ?? ''),
+                    ':subtitle' => trim($_POST['subtitle'] ?? ''),
+                    ':media_file' => $media,
+                    ':button_text' => trim($_POST['button_text'] ?? ''),
+                    ':button_link' => trim($_POST['button_link'] ?? ''),
+                    ':order_index' => (int) ($_POST['order_index'] ?? 0),
+                    ':is_active' => !empty($_POST['is_active']) ? 1 : 0,
+                    ':id' => $id,
+                ]);
+                addFlash('success', 'Hero slide updated.');
+            }
+
             if ($heroAction === 'delete') {
                 $id = (int) ($_POST['id'] ?? 0);
                 $pdo->prepare('DELETE FROM hero_slides WHERE id = :id')->execute([':id' => $id]);
@@ -265,7 +405,7 @@ switch ($action) {
             }
         }
 
-        $heroSlides = getHeroSlides();
+        $heroSlides = getDb()->query('SELECT * FROM hero_slides ORDER BY order_index ASC, id DESC')->fetchAll();
         $title = 'Hero Slides';
         $adminPage = 'hero';
         ob_start();

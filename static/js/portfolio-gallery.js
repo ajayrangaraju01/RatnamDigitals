@@ -17,6 +17,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (lightboxImage && img) {
             lightboxImage.src = img.src;
             lightboxImage.alt = title;
+            lightboxImage.style.objectPosition = (button.dataset.cropX || '50') + '% ' + (button.dataset.cropY || '50') + '%';
         }
 
         if (lightboxTitle) {

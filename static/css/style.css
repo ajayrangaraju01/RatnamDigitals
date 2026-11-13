@@ -1386,6 +1386,26 @@ body.modal-open {
     margin-bottom: 0.75rem;
 }
 
+.admin-image-edit > summary {
+    color: var(--gold-deep);
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.admin-image-edit[open] > summary {
+    margin-bottom: 1rem;
+}
+
+.admin-hero-preview {
+    display: block;
+    width: 100%;
+    max-width: 420px;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    margin-bottom: 1rem;
+    border-radius: 8px;
+}
+
 .admin-carousel-toggle {
     display: flex;
     align-items: flex-start;
@@ -1431,6 +1451,10 @@ body.modal-open {
     border: 1px solid var(--line);
     border-radius: 8px;
     background: var(--panel-strong);
+}
+
+.upload-crop-editor[hidden] {
+    display: none;
 }
 
 .upload-crop-preview {

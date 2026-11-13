@@ -29,7 +29,7 @@
 
 <div style="margin-top: 2rem;">
     <h2>Image Library</h2>
-    <p class="section-subtitle">Select two to five photos for a custom carousel. With fewer than two selected, recent uploads fill the carousel so it can rotate.</p>
+    <p class="section-subtitle">Edit a photo's details, replace its image, adjust its framing, or prioritize it for homepage features.</p>
     <?php if (!empty($images)): ?>
     <div class="admin-image-grid">
         <?php foreach ($images as $image): ?>
@@ -39,25 +39,43 @@
                 </div>
                 <div class="admin-image-controls">
                     <h3><?= htmlspecialchars($image['title'] ?: 'Untitled photo') ?></h3>
-                    <form method="post" action="/admin?page=upload">
-                        <input type="hidden" name="image_action" value="set_featured">
-                        <input type="hidden" name="id" value="<?= (int) $image['id'] ?>">
-                        <label class="admin-carousel-toggle">
-                            <input type="checkbox" name="is_featured" value="1" <?= !empty($image['is_featured']) ? 'checked' : '' ?>>
-                            <span>Show on homepage carousel</span>
-                        </label>
-                        <button type="submit" class="mini-btn">Save Selection</button>
-                    </form>
-                    <form method="post" action="/admin?page=upload" class="admin-crop-form">
-                        <input type="hidden" name="image_action" value="set_crop">
-                        <input type="hidden" name="id" value="<?= (int) $image['id'] ?>">
-                        <p class="admin-crop-hint">Adjust the crop to match the 16:9 homepage frame.</p>
-                        <label for="crop-x-<?= (int) $image['id'] ?>">Horizontal framing</label>
-                        <input id="crop-x-<?= (int) $image['id'] ?>" type="range" name="crop_x" min="0" max="100" value="<?= number_format((float) ($image['carousel_crop_x'] ?? 50), 0, '.', '') ?>">
-                        <label for="crop-y-<?= (int) $image['id'] ?>">Vertical framing</label>
-                        <input id="crop-y-<?= (int) $image['id'] ?>" type="range" name="crop_y" min="0" max="100" value="<?= number_format((float) ($image['carousel_crop_y'] ?? 50), 0, '.', '') ?>">
-                        <button type="submit" class="mini-btn">Save Crop</button>
-                    </form>
+                    <details class="admin-image-edit">
+                        <summary>Edit photo</summary>
+                        <form method="post" action="/admin?page=upload" enctype="multipart/form-data" class="admin-crop-form">
+                            <input type="hidden" name="image_action" value="update">
+                            <input type="hidden" name="id" value="<?= (int) $image['id'] ?>">
+                            <div class="form-group">
+                                <label for="image-title-<?= (int) $image['id'] ?>">Title</label>
+                                <input id="image-title-<?= (int) $image['id'] ?>" name="title" type="text" value="<?= htmlspecialchars($image['title'] ?? '') ?>">
+                            </div>
+                            <div class="form-group">
+                                <label for="image-category-<?= (int) $image['id'] ?>">Category</label>
+                                <select id="image-category-<?= (int) $image['id'] ?>" name="category">
+                                    <?php foreach (getImageCategories() as $key => $label): ?>
+                                        <option value="<?= htmlspecialchars($key) ?>" <?= $image['category'] === $key ? 'selected' : '' ?>><?= htmlspecialchars($label) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="image-caption-<?= (int) $image['id'] ?>">Caption</label>
+                                <textarea id="image-caption-<?= (int) $image['id'] ?>" name="caption"><?= htmlspecialchars($image['caption'] ?? '') ?></textarea>
+                            </div>
+                            <div class="form-group">
+                                <label for="replace-file-<?= (int) $image['id'] ?>">Replace image (optional)</label>
+                                <input id="replace-file-<?= (int) $image['id'] ?>" name="file" type="file" accept="image/*" data-image-crop="1.333333">
+                            </div>
+                            <label class="admin-carousel-toggle">
+                                <input type="checkbox" name="is_featured" value="1" <?= !empty($image['is_featured']) ? 'checked' : '' ?>>
+                                <span>Prioritize in homepage features</span>
+                            </label>
+                            <p class="admin-crop-hint">Adjust how this photo is framed wherever it appears.</p>
+                            <label for="crop-x-<?= (int) $image['id'] ?>">Horizontal framing</label>
+                            <input id="crop-x-<?= (int) $image['id'] ?>" type="range" name="crop_x" min="0" max="100" value="<?= number_format((float) ($image['carousel_crop_x'] ?? 50), 0, '.', '') ?>">
+                            <label for="crop-y-<?= (int) $image['id'] ?>">Vertical framing</label>
+                            <input id="crop-y-<?= (int) $image['id'] ?>" type="range" name="crop_y" min="0" max="100" value="<?= number_format((float) ($image['carousel_crop_y'] ?? 50), 0, '.', '') ?>">
+                            <button type="submit" class="mini-btn secondary">Save Changes</button>
+                        </form>
+                    </details>
                 </div>
             </article>
         <?php endforeach; ?>

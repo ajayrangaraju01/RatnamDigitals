@@ -13,6 +13,9 @@
         .admin-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1rem; margin-top: 1rem; }
         .admin-card { background: #f8f8f8; border: 1px solid #eee; border-radius: 12px; padding: 1.25rem; }
         .admin-card h3 { margin-bottom: 0.6rem; }
+        .admin-package-list { display: grid; gap: 1rem; margin-top: 2rem; }
+        .admin-package-form { margin-top: 1rem; }
+        .admin-package-delete { margin-top: 0.75rem; }
         .admin-table { width: 100%; border-collapse: collapse; margin-top: 1rem; }
         .admin-table th, .admin-table td { border: 1px solid #ddd; padding: 0.7rem; text-align: left; }
         .admin-form { max-width: 700px; background: #f9f9f9; border: 1px solid #eee; padding: 1.5rem; border-radius: 12px; }
@@ -34,6 +37,7 @@
                 <a href="/admin?page=upload">Upload</a>
                 <a href="/admin?page=bookings">Bookings</a>
                 <a href="/admin?page=services">Services</a>
+                <a href="/admin?page=packages">Packages</a>
                 <a href="/admin?page=hero">Hero</a>
                 <a href="/admin?page=logout">Logout</a>
             </nav>

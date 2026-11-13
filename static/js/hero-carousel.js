@@ -10,6 +10,8 @@ document.addEventListener('DOMContentLoaded', function () {
     var total = slides.length;
     var autoplay;
 
+    if (total === 0) return;
+
     function goTo(index) {
         if (index < 0) index = total - 1;
         if (index >= total) index = 0;
@@ -38,6 +40,11 @@ document.addEventListener('DOMContentLoaded', function () {
             dot.addEventListener('click', function () { goTo(i); });
             dotsContainer.appendChild(dot);
         });
+    }
+
+    if (total === 1) {
+        updateDots();
+        return;
     }
 
     if (prevBtn) prevBtn.addEventListener('click', function () { goTo(current - 1); });
